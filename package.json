@@ -1,0 +1,27 @@
+{
+  "name": "video-streaming",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app/server.js",
+  "scripts": {
+    "start": "node app/server.js",
+    "start:dev": "nodemon --ext js,hbs",
+    "start:debug": "nodemon --inspect --ext js,hbs"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-handlebars": "^5.3.0",
+    "handlebars-layouts": "^3.1.4",
+    "hbs": "^4.1.2",
+    "multer": "^1.4.2",
+    "nconf": "^0.11.2",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
