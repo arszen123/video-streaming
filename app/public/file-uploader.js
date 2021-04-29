@@ -28,6 +28,10 @@ function FileUploader(file, url) {
     this.upload = async function () {
         try {
             for await (const res of uploadNextChunk()) {
+                if (!res.ok) {
+                    throw new Error('Upload failed!');
+                }
+                setVideoId((await res.json()).videoId);
                 fireEvent('chunkuploaded', self);
             }
             fireEvent('uploaded', self);
@@ -40,6 +44,9 @@ function FileUploader(file, url) {
     function fireEvent(event, self) {
         eventListeners[event].forEach(listener => listener.call(self));
     }
+    /**
+     * @returns {Response[]}
+     */
     function* uploadNextChunk() {
         while (chunkStart < fileSize) {
             const chunkEnds = Math.min(chunkStart + MAX_CHUNK_SIZE, fileSize) 
@@ -55,12 +62,11 @@ function FileUploader(file, url) {
                 },
                 body: fd
             }).then(tap(() => chunkStart = chunkEnds))
-            .then(tap(setVideoId));
         }
     }
-    function setVideoId(res) {
-        res.json().then(data => {
-            videoId = data.videoId;
-        })
+    function setVideoId(id) {
+        if (!videoId) {
+            videoId = id
+        }
     }
 }

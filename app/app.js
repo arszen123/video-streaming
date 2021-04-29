@@ -31,18 +31,20 @@ app.use((err, req, res, next) => {
     errorHandler(err, req, res);
 });
 
-module.exports = app;
-
 function errorHandler(err, req, res) {
     const errorData = {code: 500, message: 'Internal server error!'};
+    let originalMessage = err.message;
     if (err instanceof HttpError) {
         errorData.code = err.code;
         errorData.message = err.message;
+        originalMessage = err.previousErrorMessage;
     }
     console.error({
         path: req.path,
         ...errorData,
-        originalMessage: err.message
+        originalMessage,
     });
     res.status(errorData.code).json(errorData);
 }
+
+module.exports = app;

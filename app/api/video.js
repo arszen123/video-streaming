@@ -1,12 +1,11 @@
 "use strict";
 const HttpError = require('../errors/http-error');
 const Router = require('express').Router;
-const {Readable} = require('stream');
 const router = new Router();
 const videoService = require('../services/video');
 const videoUploaderService = require('../services/video-uploader');
 const multer = require('multer')();
-const fs = require('fs');
+const {getFile} = require('../services/bucket');
 
 const CHUNK_SIZE = (10 ** 6); // 1MB;
 router.get('/api/video/:id', (req, res) => {
@@ -15,11 +14,12 @@ router.get('/api/video/:id', (req, res) => {
     if (typeof range === 'undefined') {
         throw new HttpError(400, 'Header "Range" is required!');
     }
-    videoService.findVideoById(id).then(video => {
-        const filePath = videoService.getVideoPath(video);
-        const fileSize = fs.statSync(filePath).size;
+    videoService.findById(id).then(async video => {
+        const filePathOption = videoService.getVideoPathOption(video);
+        const file = await getFile(filePathOption);
+        const fileSize = await file.size();
         const {start, end} = getRangeFromHeader(range, fileSize);
-        const fileStream = fs.createReadStream(filePath, {start, end})
+        const fileStream = file.createReadStream({start, end});
         res.writeHeader(206, {
             'Content-Range': `bytes ${start}-${end}/${fileSize}`,
             'Accept-Ranges': 'bytes',
@@ -28,7 +28,7 @@ router.get('/api/video/:id', (req, res) => {
         });
         fileStream.pipe(res);
     }).catch(e => {
-        res.throw(new HttpError(404, 'Video not found!'));
+        res.throw(new HttpError(404, 'Video not found!',e));
     });
 });
 
@@ -44,23 +44,24 @@ router.post('/api/video/upload', multer.single('chunk'), (req, res) => {
     } else {
         video = videoUploaderService.create();
     }
-    video.then(video => {
-        const filePath = videoUploaderService.getVideoPath(video)
-        const readable = new Readable();
-        const ws = fs.createWriteStream(filePath, {flags: 'a'});
-        readable.push(file.buffer);
-        readable.push(null);
-        readable.pipe(ws);
+    video.then(async video => {
+        const filePathOption = videoUploaderService.getVideoPathOption(video)
+        const storedFile = getFile(filePathOption);
+        if (videoId) {
+            await storedFile.append(file.buffer);
+        } else {
+            await storedFile.save(file.buffer, {resumable: false, metadata: {contentType: 'video/mp4'}});
+        }
         res.json({
             success: true,
             videoId: video.id,
         })
-    }).catch(() => {
+    }).catch(e => {
         if (videoId) {
-            res.throw(new HttpError(404, 'Video not found!'));
+            res.throw(new HttpError(404, 'Video not found!',e));
             return;
         }
-        res.throw(new HttpError(400, 'Error'));
+        res.throw(new HttpError(400, 'Error', e));
     });
 });
 

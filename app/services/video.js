@@ -1,32 +1,87 @@
 "use strict";
-const path = require('path');
-const db = require('./db');
-const DB_TABLE = 'videos';
 const config = require('../config');
+const {Datastore} = require('@google-cloud/datastore');
+const ds = new Datastore({projectId: config.get('GCLOUD_PROJECT')});
+const KIND = 'Video';
 
+function setEntityId(obj) {
+    obj.id = obj[ds.KEY].id;
+    delete obj[ds.KEY];
+    return obj;
+}
+
+/**
+ * @typedef {Object} Video
+ * @property {number} id
+ * @property {string} title
+ * @property {string} file
+ */
+
+/**
+ * @returns {Promise<Video[]>}
+ */
 function findAll() {
-    return db.data(DB_TABLE);
+    return ds.createQuery(KIND).run().then(([data]) => data.map(setEntityId));
 }
 
-function findVideoById(id) {
-    return findAll().then(videos => videos.find(video => video.id == id));
+/**
+ * @param {number} id 
+ * @returns {Promise<Video>}
+ */
+async function findById(id) {
+    const key = ds.key([KIND, Number.parseInt(id)]);
+    const [res] = await ds.get(key);
+    if (res) {
+        return setEntityId(res);
+    }
+    throw new Error('Video not found!');
 }
 
-function createVideo({title, file}) {
-    return db.save(DB_TABLE, {title, file});
+/**
+ * 
+ * @param {Object} param
+ * @param {string} param.title
+ * @param {string} param.file 
+ * @returns {Promise<Video>}
+ */
+async function create({title, file}) {
+    const key = ds.key(KIND);
+    const data = {
+        title,
+        file,
+    };
+    const entity = {
+        key,
+        data
+    };
+    await ds.save(entity);
+    return {...data, id: key.id};
 }
 
+/**
+ * @param {Video} video 
+ * @returns {string}
+ */
 function getVideoPath(video) {
-    return _getVideoFilePath(video.file);
+    const option = getVideoPathOption(video);
+    return `gs://${option.bucket}/${option.file}`;
 }
 
-function _getVideoFilePath(file) {
-    return path.join(config.get('MEDIA_PATH'), file);
+/**
+ * @param {Video} video 
+ * @returns 
+ */
+function getVideoPathOption(video) {
+    return {
+        bucket: config.get('GCLOUD_MEDIA_BUCKET'),
+        file: video.file,
+    }
 }
 
 module.exports = {
     findAll,
-    findVideoById,
-    createVideo,
+    findById,
+    create,
     getVideoPath,
+    getVideoPathOption,
 }

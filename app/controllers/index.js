@@ -2,11 +2,8 @@
 const router = new (require('express').Router)();
 const videoService = require('../services/video');
 const videoUploaderService = require('../services/video-uploader');
-const path = require('path');
-const fs = require('fs');
-const util = require('util');
 const HttpError = require('../errors/http-error');
-const moveFile = util.promisify(fs.rename);
+const bucket = require('../services/bucket');
 
 router.get('/', (req, res) => {
     videoService.findAll().then(videos => {
@@ -16,12 +13,14 @@ router.get('/', (req, res) => {
 
 router.get('/video/:id', (req, res) => {
     const {id} = req.params;
-    videoService.findVideoById(id).then(video => {
+    videoService.findById(id).then(video => {
         if (!video) {
             res.redirect('/');
             return;
         }
         res.render('pages/video', {video});
+    }).catch(e => {
+        res.throw(new HttpError(404, 'Video not found!', e));
     })
 })
 
@@ -36,16 +35,15 @@ router.post('/upload', (req, res) => {
         return;
     }
     videoUploaderService.findById(videoId).then(async uploadedVideo => {
-        const oldPath = videoUploaderService.getVideoPath(uploadedVideo);
-        const file = path.basename(oldPath);
-        const video = await videoService.createVideo({title, file});
-        const newPath = videoService.getVideoPath(video);
-        await moveFile(oldPath, newPath);
-        await videoUploaderService.remove(videoId);
+        const oldPath = videoUploaderService.getVideoPathOption(uploadedVideo);
+        const file = oldPath.file;
+        const video = await videoService.create({title, file});
+        const newPath = videoService.getVideoPathOption(video);
+        await bucket.getFile(oldPath).moveByOption(newPath);
     }).then(() => {
         res.redirect('/');
-    }).catch(() => {
-        res.throw(new HttpError(400, 'Error'));
+    }).catch(e => {
+        res.throw(new HttpError(400, 'Error', e));
     })
 })
 
