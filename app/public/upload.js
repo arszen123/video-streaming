@@ -25,7 +25,7 @@ form.addEventListener('submit', function (event) {
  */
 fileElement.addEventListener('change', function () {
     const file = this.files[0];
-    const fileUploader = new FileUploader(file, 'http://localhost:8080/api/video/upload');
+    const fileUploader = new FileUploader(file, '/api/video/upload');
     progressInfoElement.innerText = '';
     fileProgressElement.setAttribute('aria-valuenow', 0);
     fileProgressElement.style.setProperty('width', 0);

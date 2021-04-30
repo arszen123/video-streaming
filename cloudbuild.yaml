@@ -1,0 +1,4 @@
+steps:
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: 'bash'
+  args: ['-c', "sed -i 's/{PROJECT_ID}/'$PROJECT_ID'/g' app.yaml && gcloud app deploy"]
