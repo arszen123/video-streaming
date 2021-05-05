@@ -1,0 +1,37 @@
+<h1 style="text-align: center;">Upload video</h1>
+<form #formElement [formGroup]="form" id="upload-form" class="row g-3" method="POST" novalidate>
+    <input formControlName="videoId" id="video-id" type="hidden" name="videoId">
+    <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <input formControlName="title" type="text" class="form-control" id="title" name="title" placeholder="Video title" required>
+        <div class="invalid-feedback">
+            Title is required!
+        </div>
+    </div>
+    <div class="mb-3">
+        <div class="mb-3">
+            <label for="file" class="form-label">Video (Only mp4 is accepted)</label>
+            <input (change)="uploadFile($event)" type="file" class="form-control" id="file" accept="video/mp4" required>
+            <div class="invalid-feedback">
+                Video file is required!
+            </div>
+        </div>
+        <div class="mb-3 progress">
+            <div id="file-progress" class="progress-bar" role="progressbar" [attr.aria-valuenow]="uploadProgress" [style]="{width: uploadProgress + '%'}" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <p id="proggress-info" [ngSwitch]="uploadStatus$ | async">
+            <ng-container *ngSwitchCase="'pending'">
+                Uploading...
+            </ng-container>
+            <ng-container *ngSwitchCase="'completed'">
+                Uploaded!
+            </ng-container>
+            <ng-container *ngSwitchCase="'error'">
+                Failed to upload video! Pleas try again later.
+            </ng-container>
+        </p>
+    </div>
+    <div class="mb-3">
+        <button (click)="save(formElement)" [disabled]="!form.valid" id="submit" type="submit" class="btn btn-primary mb-3">Save</button>
+    </div>
+</form>

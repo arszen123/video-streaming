@@ -5,21 +5,29 @@
 - Upload video in chunks
 - Stream video in chunks
 
-## Setup (GCP local)
-1. Create new GCP project.
+## Prerequisites
+1. Create a new GCP project.
 2. Open Cloud shell.
-3. Install ```node```, ```npm```.
-4. Clone repository.
-4. Run ```./setup_environment.sh```
-5. Run ```npm install```
-6. Run ```npm start```
-6. Click "Web preview" > "Preview on port 8080"
+3. Clone the repository.
+4. Run ```./setup/setup_environment.sh```.
+
+## Set up local development
+1. Install ```gcloud```, and initialize project with ```gcloud init```.
+2. Create and init local service account.
+```bash
+# Create new service account
+gcloud iam service-accounts create local-dev-env
+# Set service account role.
+gcloud projects add-iam-policy-binding video-streaming-312208 --member="serviceAccount:local-dev-env@video-streaming-312208.iam.gserviceaccount.com" --role="roles/owner"
+# Generate service-account.json key file.
+gcloud iam service-accounts keys create service-account.json --iam-account=local-dev-env@video-streaming-312208.iam.gserviceaccount.com
+# Export key file path
+export GOOGLE_APPLICATION_CREDENTIALS=$PWD"/service-account.json"
+```
+3. Run ```npm install``` and ```npm start``` in both backend and frontend directories.
 
 ## Deploy from Cloud Shell
-1. Clone repository.
-2. Run ```./setup_environment.sh``` (Only need to run once, to enable services and create buckets).
-3. Run ```sed -i 's/{PROJECT_ID}/'$DEVSHELL_PROJECT_ID'/g' app.yaml``` to replace {PROJECT_ID} with the actual project id in the app.yaml.
-4. Run ```gcloud app deploy``` to deploy.
+1. Follow the steps in the "cloudbuild.yaml" file.
 
 ## Deploy with Cloud Build
 1. Create a new Cloud Source Repository and upload the source code or set it up as an external repository.

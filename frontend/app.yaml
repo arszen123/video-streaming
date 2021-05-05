@@ -1,0 +1,10 @@
+runtime: nodejs14
+
+handlers:
+  - url: /(.*\.(gif|png|jpg|css|js)(|\.map))$
+    static_files: dist/video-streaming-site/\1
+    upload: dist/video-streaming-site/(.*)(|\.map)
+
+  - url: /(.*)
+    static_files: dist/video-streaming-site/index.html
+    upload: dist/video-streaming-site/index.html

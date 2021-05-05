@@ -1,8 +1,0 @@
-runtime: nodejs14
-
-# The below variables wont work as we expect.
-# The Cloud Build will replace the ${PROJECT_ID} with the actual project id.
-env_variables:
-  GCLOUD_PROJECT: {PROJECT_ID}
-  GCLOUD_MEDIA_BUCKET: {PROJECT_ID}-media
-  GCLOUD_MEDIA_TEMP_BUCKET: {PROJECT_ID}-media-temp

@@ -1,4 +1,30 @@
 steps:
+
+# build frontend
+- name: 'gcr.io/cloud-builders/npm'
+  dir: 'frontend'
+  args: ["install"]
+#- name: 'buildkite/puppeteer'
+#  dir: 'frontend'
+#  args: ["npm", "run", "test:chrome:headless"]
+- name: 'gcr.io/cloud-builders/npm'
+  dir: 'frontend'
+  entrypoint: 'bash'
+  args: ["-c", "sed -i 's,{API_BASE_URL},'$(gcloud app browse --no-launch-browser)',g' src/environments/environment.prod.ts && npm run build:prod"]
+
+# Deploy frontend service
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: 'bash'
-  args: ['-c', "sed -i 's/{PROJECT_ID}/'$PROJECT_ID'/g' app.yaml && gcloud app deploy"]
+  dir: 'frontend'
+  args: ['-c', "gcloud app deploy app.yaml"]
+
+# Deploy backend service
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: 'bash'
+  dir: 'backend'
+  args: ['-c', "sed -i 's/{PROJECT_ID}/'$PROJECT_ID'/g' app.yaml && gcloud app deploy app.yaml"]
+
+# Deploy dispatch.yaml
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: 'bash'
+  args: ['-c', "gcloud app deploy dispatch.yaml"]
