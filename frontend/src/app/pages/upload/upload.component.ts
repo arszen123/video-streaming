@@ -3,7 +3,8 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { OnUnsavedChanges } from 'src/app/interfaces/on-unsaved-changes';
+import { OnUnsavedChanges } from 'src/app/interfaces/on-unsaved-changes.interface';
+import { AlertService } from 'src/app/modules/alert';
 import { UploadService } from 'src/app/services/upload.service';
 import { VideoService } from 'src/app/services/video.service';
 
@@ -34,6 +35,7 @@ export class UploadComponent implements OnInit, OnUnsavedChanges {
     private uploadService: UploadService,
     private videoService: VideoService,
     private router: Router,
+    private alertService: AlertService,
   ) { }
 
   ngOnInit(): void {
@@ -70,6 +72,7 @@ export class UploadComponent implements OnInit, OnUnsavedChanges {
     if (form.checkValidity() && this.form.valid) {
       this.videoService.create(this.form.value).subscribe(({id}) => {
         this.isSaved = true;
+        this.alertService.open('Video saved!');
         this.router.navigateByUrl(`/video/${id}`);
       });
       return;

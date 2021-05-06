@@ -1,12 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { AppComponent } from './app.component';
+import { AngularFireAuth } from '@angular/fire/auth';
+import { BehaviorSubject } from 'rxjs';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
+    const spy = jasmine.createSpyObj('AngularFireAuth', ['signOut'], {
+      // @ts-ignore
+      user: new BehaviorSubject({uid: 'test'}),
+    });
     await TestBed.configureTestingModule({
       imports: [
         RouterTestingModule
+      ],
+      providers: [
+        {provide: AngularFireAuth, useValue: spy},
       ],
       declarations: [
         AppComponent

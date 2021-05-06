@@ -1,0 +1,21 @@
+<h1>Register</h1>
+<form #formElement [formGroup]="form"  id="register-form" class="row g-3" method="POST" novalidate>
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input formControlName="email" type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+        <div class="invalid-feedback">
+            Email is required!
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input formControlName="password" type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+        <div class="invalid-feedback">
+            Password is required!
+        </div>
+    </div>
+    <div class="mb-3">
+        <button (click)="register(formElement)" [disabled]="!form.valid" id="submit" type="submit" class="btn btn-primary mb-3">Register</button>
+    
+    </div>
+</form>

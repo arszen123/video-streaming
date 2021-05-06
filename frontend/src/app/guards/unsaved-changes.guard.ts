@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanDeactivate, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { OnUnsavedChanges } from '../interfaces/on-unsaved-changes';
+import { OnUnsavedChanges } from '../interfaces/on-unsaved-changes.interface';
 
 @Injectable({
   providedIn: 'root'

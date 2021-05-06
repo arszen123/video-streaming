@@ -1,0 +1,3 @@
+<div class="alert-list" >
+    <app-alert *ngFor="let alert of alerts$ | async" [alert]="alert" (close)="close(alert)"></app-alert>
+</div>

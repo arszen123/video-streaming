@@ -6,6 +6,7 @@ const videoService = require('../services/video');
 const videoUploaderService = require('../services/video-uploader');
 const multer = require('multer')();
 const {getFile} = require('../services/bucket');
+const {authMiddleware} = require('../services/auth');
 
 const CHUNK_SIZE = (10 ** 6); // 1MB;
 
@@ -15,24 +16,30 @@ router.get('/api/videos', (req, res) => {
     });
 });
 
-router.post('/api/videos', (req, res) => {
-    const {title, videoId} = req.body;
-    if (!videoId) {
-        throw new HttpError(400, '"videoId" is required');
+router.post(
+    '/api/videos',
+    authMiddleware,
+    (req, res) => {
+        const {title, videoId} = req.body;
+        if (!videoId) {
+            throw new HttpError(400, '"videoId" is required');
+        }
+        videoUploaderService.findById(videoId)
+            .then(async uploadedVideo => {
+                const oldPath =
+                    videoUploaderService.getVideoPathOption(uploadedVideo);
+                const file = oldPath.file;
+                const video = await videoService.create({title, file});
+                const newPath = videoService.getVideoPathOption(video);
+                await getFile(oldPath).moveByOption(newPath);
+                return video;
+            }).then(({file, ...video}) => {
+                res.json(video);
+            }).catch(e => {
+                res.throw(new HttpError(400, 'Error', e));
+            })
     }
-    videoUploaderService.findById(videoId).then(async uploadedVideo => {
-        const oldPath = videoUploaderService.getVideoPathOption(uploadedVideo);
-        const file = oldPath.file;
-        const video = await videoService.create({title, file});
-        const newPath = videoService.getVideoPathOption(video);
-        await getFile(oldPath).moveByOption(newPath);
-        return video;
-    }).then(({file, ...video}) => {
-        res.json(video);
-    }).catch(e => {
-        res.throw(new HttpError(400, 'Error', e));
-    })
-});
+);
 
 router.get('/api/videos/:id', (req, res) => {
     const {id} = req.params;
@@ -70,35 +77,44 @@ router.get('/api/videos/:id/stream', (req, res) => {
 /**
  * Assume the chunks are uploaded sequentialy in order.
  */
-router.post('/api/upload-chunk', multer.single('chunk'), (req, res) => {
-    const {videoId} = req.body;
-    const {file} = req;
-    let video = null;
-    if (videoId) {
-        video = videoUploaderService.findById(videoId);
-    } else {
-        video = videoUploaderService.create();
-    }
-    video.then(async video => {
-        const filePathOption = videoUploaderService.getVideoPathOption(video)
-        const storedFile = getFile(filePathOption);
+router.post(
+    '/api/upload-chunk',
+    authMiddleware,
+    multer.single('chunk'),
+    (req, res) => {
+        const {videoId} = req.body;
+        const {file} = req;
+        let video = null;
         if (videoId) {
-            await storedFile.append(file.buffer);
+            video = videoUploaderService.findById(videoId);
         } else {
-            await storedFile.save(file.buffer, {resumable: false, metadata: {contentType: 'video/mp4'}});
+            video = videoUploaderService.create();
         }
-        res.json({
-            success: true,
-            videoId: video.id,
-        })
-    }).catch(e => {
-        if (videoId) {
-            res.throw(new HttpError(404, 'Video not found!',e));
-            return;
-        }
-        res.throw(new HttpError(400, 'Error', e));
-    });
-});
+        video.then(async video => {
+            const filePathOption = 
+                videoUploaderService.getVideoPathOption(video)
+            const storedFile = getFile(filePathOption);
+            if (videoId) {
+                await storedFile.append(file.buffer);
+            } else {
+                await storedFile.save(file.buffer, {
+                    resumable: false,
+                    metadata: {contentType: 'video/mp4'}
+                });
+            }
+            res.json({
+                success: true,
+                videoId: video.id,
+            })
+        }).catch(e => {
+            if (videoId) {
+                res.throw(new HttpError(404, 'Video not found!',e));
+                return;
+            }
+            res.throw(new HttpError(400, 'Error', e));
+        });
+    }
+);
 
 function getRangeFromHeader(range, maxSize) {
     const [start, end, size] = range.replace(/bytes(=| )/, '')

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { VideoService } from 'src/app/services/video.service';
-import { IVideo } from 'src/app/interfaces/video';
+import { IVideo } from 'src/app/interfaces/video.interface';
 @Component({
   selector: 'app-list',
   templateUrl: './list.component.html',

@@ -7,10 +7,15 @@ steps:
 #- name: 'buildkite/puppeteer'
 #  dir: 'frontend'
 #  args: ["npm", "run", "test:chrome:headless"]
+# get environment.prod.ts
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  dir: 'frontend/src/environments'
+  entrypoint: 'bash'
+  args: ["-c", "gsutil cp gs://$PROJECT_ID-env/environment.prod.ts environment.prod.ts"]
 - name: 'gcr.io/cloud-builders/npm'
   dir: 'frontend'
   entrypoint: 'bash'
-  args: ["-c", "sed -i 's,{API_BASE_URL},'$(gcloud app browse --no-launch-browser)',g' src/environments/environment.prod.ts && npm run build:prod"]
+  args: ["-c", "npm run build:prod"]
 
 # Deploy frontend service
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
