@@ -11,7 +11,7 @@ steps:
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   dir: 'frontend/src/environments'
   entrypoint: 'bash'
-  args: ["-c", "gsutil cp gs://$PROJECT_ID-env/environment.prod.ts environment.prod.ts"]
+  args: ["-c", "gsutil cp gs://$PROJECT_ID-env/environment.prod.ts environment.prod.ts && cp environment.prod.ts environment.ts"]
 - name: 'gcr.io/cloud-builders/npm'
   dir: 'frontend'
   entrypoint: 'bash'
