@@ -15,7 +15,8 @@ export class UploadService {
     const fileUploader = new FileUploader(
       file,
       environment.apiUrl + '/api/upload-chunk',
-      this.http);
+      this.http
+    );
     return fileUploader;
   }
 }

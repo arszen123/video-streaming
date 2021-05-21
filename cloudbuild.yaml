@@ -23,10 +23,16 @@ steps:
   dir: 'frontend'
   args: ['-c', "gcloud app deploy app.yaml"]
 
-# Deploy backend service
+# Deploy backend/video service
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: 'bash'
-  dir: 'backend'
+  dir: 'backend/video'
+  args: ['-c', "sed -i 's/{PROJECT_ID}/'$PROJECT_ID'/g' app.yaml && gcloud app deploy app.yaml"]
+
+# Deploy backend/comment service
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: 'bash'
+  dir: 'backend/comment'
   args: ['-c', "sed -i 's/{PROJECT_ID}/'$PROJECT_ID'/g' app.yaml && gcloud app deploy app.yaml"]
 
 # Deploy dispatch.yaml

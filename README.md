@@ -4,6 +4,9 @@
 
 - Upload video in chunks
 - Stream video in chunks
+- Auth
+- Create comment
+- List comments
 
 ## Prerequisites
 - GCP project
@@ -22,9 +25,9 @@
 # Create new service account
 gcloud iam service-accounts create local-dev-env
 # Set service account role.
-gcloud projects add-iam-policy-binding video-streaming-312208 --member="serviceAccount:local-dev-env@video-streaming-312208.iam.gserviceaccount.com" --role="roles/owner"
+gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:local-dev-env@"$PROJECT_ID".iam.gserviceaccount.com" --role="roles/owner"
 # Generate service-account.json key file.
-gcloud iam service-accounts keys create service-account.json --iam-account=local-dev-env@video-streaming-312208.iam.gserviceaccount.com
+gcloud iam service-accounts keys create service-account.json --iam-account=local-dev-env@$PROJECT_ID.iam.gserviceaccount.com
 # Export key file path
 export GOOGLE_APPLICATION_CREDENTIALS=$PWD"/service-account.json"
 ```

@@ -5,4 +5,5 @@
         <source [src]="videoUrl" type="video/mp4">
          Your browser does not support HTML video.
     </video>
+    <app-comments [videoId]="video.id" [createCommentEnabled]="isAuthenticated$ | async"></app-comments>
 </ng-container>

@@ -17,6 +17,7 @@ import { LoginComponent } from './components/login/login.component';
 import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { environment } from 'src/environments/environment';
 import { AlertModule } from './modules/alert';
+import { CommentModule } from './modules/comment/comment.module';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { AlertModule } from './modules/alert';
   imports: [
     BrowserModule,
     AlertModule,
+    CommentModule,
     AppRoutingModule,
     HttpClientModule,
     FormsModule,

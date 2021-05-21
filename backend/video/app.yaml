@@ -1,5 +1,5 @@
 runtime: nodejs14
-service: backend
+service: video
 
 # The below variables wont work as we expect.
 # The Cloud Build will replace the ${PROJECT_ID} with the actual project id.

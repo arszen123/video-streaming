@@ -5,6 +5,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { VideoService } from 'src/app/services/video.service';
 import { VideoComponent } from './video.component';
 import { environment } from 'src/environments/environment';
+import { AngularFireAuth } from '@angular/fire/auth';
 
 describe('VideoComponent', () => {
   const video = {id: 1, title: 'Test video'};
@@ -14,11 +15,15 @@ describe('VideoComponent', () => {
 
   beforeEach(async () => {
     const spy = jasmine.createSpyObj('VideoService', ['findById']);
+    const authSpy = jasmine.createSpyObj('AngularFireAuth', ['signOut'], {
+      // @ts-ignore
+      user: new BehaviorSubject({uid: 'test'}),
+    });
     await TestBed.configureTestingModule({
       declarations: [ VideoComponent ],
       imports: [
           RouterTestingModule.withRoutes([
-          {path: 'video/:id', component: VideoComponent}
+          {path: 'video/:id', component: VideoComponent},
         ])
       ],
       providers: [
@@ -27,7 +32,8 @@ describe('VideoComponent', () => {
           params: of({
             id: video.id
           })
-        }}
+        }},
+        {provide: AngularFireAuth, useValue: authSpy},
       ]
     })
     .compileComponents();

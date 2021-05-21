@@ -1,3 +1,5 @@
 dispatch:
+  - url: '*/api/comment-lists/*'
+    service: comment
   - url: '*/api/*'
-    service: backend
+    service: video

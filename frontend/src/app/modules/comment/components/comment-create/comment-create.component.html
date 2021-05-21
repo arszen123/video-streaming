@@ -1,0 +1,8 @@
+<div>
+    <label for="description" class="form-label">Write a comment</label>
+    <textarea id="description" [formControl]="commentControl" class="form-control"></textarea>
+    <button
+        (click)="saveComment()"
+        [disabled]="hasNoCommentText()"
+        class="btn btn-primary">Comment</button>
+</div>

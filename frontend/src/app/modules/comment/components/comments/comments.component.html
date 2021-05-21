@@ -1,0 +1,16 @@
+<div id="comment-container" >
+    <ng-container *ngIf="comments$ | async as comments">
+        <app-comment-create *ngIf="createCommentEnabled" [videoId]="videoId"></app-comment-create>
+        <div id="comments">
+            <div *ngIf="comments.length === 0" class="card">
+                <div class="card-body">
+                    Be the first who write's a comment
+                </div>
+            </div>
+            <app-comment *ngFor="let comment of comments" [comment]="comment"></app-comment>
+        </div>
+    </ng-container>
+    <span *ngIf="!(comments$ | async)">
+        Comments service is not available!
+    </span>
+</div>
